@@ -1,20 +1,14 @@
 package main
 
 import (
-	"errors"
 	"flag"
-	"fmt"
 	"io"
+	"log"
 	"os"
 	"strings"
 
-	"github.com/takahashim/aozoraconv"
+	"github.com/octu0/aozoraconv"
 )
-
-func errorf(format string, a ...interface{}) (ret int, err error) {
-	ret, err = fmt.Fprintf(os.Stderr, format+"\n", a...)
-	return ret, err
-}
 
 func getOuput(path string) (output io.Writer, err error) {
 	if path == "" {
@@ -32,7 +26,7 @@ func getInput(path string, stdin bool) (input io.Reader, err error) {
 		return os.Stdin, nil
 	}
 	if path == "" {
-		return nil, errors.New("input file is not defined")
+		return os.Stdin, nil
 	}
 	input, err = os.Open(path)
 	if err != nil {
@@ -41,12 +35,10 @@ func getInput(path string, stdin bool) (input io.Reader, err error) {
 	return input, nil
 }
 
-func doMain() int {
-
+func main() {
 	var (
 		useSjis, useUtf8 bool
 		useStdin         bool
-		enc              int
 		path, outpath    string
 		encoding         string
 	)
@@ -56,44 +48,41 @@ func doMain() int {
 	flag.BoolVar(&useUtf8, "u", false, "convert from Shift_JIS into UTF-8")
 	flag.StringVar(&outpath, "o", "", "output filename")
 	flag.BoolVar(&useStdin, "stdin", false, "use standard input")
-
 	flag.Parse()
+
+	if useSjis && useUtf8 {
+		log.Fatalf("only -s or -u can be enabled")
+	}
 
 	path = flag.Arg(0)
 
 	input, err := getInput(path, useStdin)
 	if err != nil {
-		errorf("error: %s", err)
-		return 1
+		log.Fatalf("error: %v", err)
 	}
 
 	output, err := getOuput(outpath)
 	if err != nil {
-		errorf("error: %s", err)
-		return 1
+		log.Fatalf("error: %v", err)
 	}
 
-	if strings.ToLower(encoding) == "utf8" || strings.ToLower(encoding) == "utf-8" || useUtf8 {
-		enc = aozoraconv.EncUtf8
-	} else if strings.ToLower(encoding) == "sjis" || strings.ToLower(encoding) == "shift_jis" || useSjis {
-		enc = aozoraconv.EncSjis
-	} else {
-		errorf("define encoding -s (Shift_JIS) or -u (UTF-8) or -e sting")
-		return 1
+	if useUtf8 {
+		encoding = "utf8"
+	}
+	if useSjis {
+		encoding = "sjis"
 	}
 
-	if enc == aozoraconv.EncUtf8 {
-		err = aozoraconv.Decode(input, output)
-	} else { // enc == aozoraconv.EncSjis
-		err = aozoraconv.Encode(input, output)
+	switch strings.ToLower(encoding) {
+	case "utf8", "utf-8":
+		if err := aozoraconv.Encode(output, input); err != nil {
+			log.Fatalf("error: %+v", err)
+		}
+	case "sjis", "shift_jis":
+		if err := aozoraconv.Decode(output, input); err != nil {
+			log.Fatalf("error: %+v", err)
+		}
+	default:
+		log.Fatalf("require encoding args: -s (Shift_JIS) or -u (UTF-8) or -e sting")
 	}
-	if err != nil {
-		errorf("error: %v", err)
-		return 1
-	}
-	return 0
-}
-
-func main() {
-	os.Exit(doMain())
 }

@@ -1,10 +1,10 @@
 package aozoraconv
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
+	"github.com/pkg/errors"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 )
@@ -48,11 +48,11 @@ func Conv(w io.Writer, r io.Reader) error {
 		text := scan.Text()
 		replaced := aozoraUtf8CharReplacer.Replace(text)
 		if _, err := w.Write([]byte(replaced)); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 	}
 	if err := scan.Err(); err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -64,11 +64,11 @@ func ConvRev(w io.Writer, r io.Reader) error {
 		text := scan.Text()
 		replaced := aozoraUtf8CharReplacerR.Replace(text)
 		if _, err := w.Write([]byte(replaced)); err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 	}
 	if err := scan.Err(); err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -78,7 +78,7 @@ func Decode(output io.Writer, input io.Reader) (err error) {
 	decoder := japanese.ShiftJIS.NewDecoder()
 	reader := transform.NewReader(input, decoder)
 	if err := ConvRev(output, reader); err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -88,7 +88,7 @@ func Encode(output io.Writer, input io.Reader) (err error) {
 	encoder := japanese.ShiftJIS.NewEncoder()
 	writer := transform.NewWriter(output, encoder)
 	if err := Conv(writer, input); err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }
@@ -96,11 +96,11 @@ func Encode(output io.Writer, input io.Reader) (err error) {
 // Jis2Uni returns a string from jis codepoint
 func Jis2Uni(men, ku, ten int) (str string, err error) {
 	if men < 1 || men > 2 || ku < 1 || ku > 94 || ten < 1 || ten > 94 {
-		return "", fmt.Errorf("error: args should be in 1..2, 1..94, 1..94")
+		return "", errors.Errorf("error: args should be in 1..2, 1..94, 1..94")
 	}
 	chr := jis0213Decode[men-1][ku-1][ten-1]
 	if chr == "" {
-		return "", fmt.Errorf("invalid access men: %v ku:%v ten:%v", men, ku, ten)
+		return "", errors.Errorf("invalid access men: %v ku:%v ten:%v", men, ku, ten)
 	}
 	return chr, nil
 }
@@ -113,7 +113,7 @@ func Uni2Jis(str string) (jis JisEntry, err error) {
 	if len(r) == 1 {
 		switch {
 		case 0x20 <= r1 && r1 < 0x7f:
-			return JisEntry{0, 0, 0}, fmt.Errorf("ASCII character")
+			return JisEntry{0, 0, 0}, errors.Errorf("ASCII character")
 		case encode0Low <= r1 && r1 < encode0High:
 			if s1 = encode0[r1-encode0Low]; (s1>>planeShift)&0x0003 > 0 {
 				goto write2
@@ -135,7 +135,7 @@ func Uni2Jis(str string) (jis JisEntry, err error) {
 				goto write2
 			}
 		}
-		return JisEntry{0, 0, 0}, fmt.Errorf("invalid character")
+		return JisEntry{0, 0, 0}, errors.Errorf("invalid character")
 	write2:
 		men := int8(s1 >> planeShift)
 		ku := int8((s1 >> codeShift) & codeMask)
@@ -149,7 +149,7 @@ func Uni2Jis(str string) (jis JisEntry, err error) {
 		}
 		return entry, nil
 	}
-	return JisEntry{0, 0, 0}, fmt.Errorf("length of string should be 1 or 2")
+	return JisEntry{0, 0, 0}, errors.Errorf("length of string should be 1 or 2")
 }
 
 // Is0208 checks triplet men-ku-ten is in JIS X 0208 or not
