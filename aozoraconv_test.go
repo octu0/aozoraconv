@@ -39,8 +39,12 @@ func TestConv(t *testing.T) {
 		{"¢", "￠"},
 	}
 	for _, tt := range convertedStrings {
-		if got, want := Conv(tt.in), tt.out; got != want {
-			t.Errorf("Conv: got %v want %v", got, want)
+		buf := bytes.NewBuffer(nil)
+		if err := Conv(buf, strings.NewReader(tt.in)); err != nil {
+			t.Errorf("no error: %+v", err)
+		}
+		if buf.String() != tt.out {
+			t.Errorf("Conv: got %v want %v", buf.String(), tt.out)
 		}
 	}
 }
@@ -60,8 +64,12 @@ func TestConvR(t *testing.T) {
 		{"￠", "¢"},
 	}
 	for _, tt := range convertedStrings {
-		if got, want := ConvRev(tt.in), tt.out; got != want {
-			t.Errorf("ConvRev: got %v want %v", got, want)
+		buf := bytes.NewBuffer(nil)
+		if err := ConvRev(buf, strings.NewReader(tt.in)); err != nil {
+			t.Errorf("no error: %+v", err)
+		}
+		if buf.String() != tt.out {
+			t.Errorf("ConvRev: got %v want %v", buf.String(), tt.out)
 		}
 	}
 }
@@ -127,11 +135,13 @@ func TestEncode(t *testing.T) {
 	}
 	for _, tt := range convertedPairs {
 		input := strings.NewReader(tt.in)
-		output := new(bytes.Buffer)
+		output := bytes.NewBuffer(nil)
 
-		Encode(input, output)
-		if got, want := output.Bytes(), tt.out; bytes.Compare(got, want) != 0 {
-			t.Errorf("Encode got: %v, want: %v", got, want)
+		if err := Encode(output, input); err != nil {
+			t.Errorf("no error: %+v", err)
+		}
+		if bytes.Equal(output.Bytes(), tt.out) != true {
+			t.Errorf("Encode got: %v, want: %v", output.Bytes(), tt.out)
 		}
 	}
 }
@@ -146,12 +156,14 @@ func TestDecode(t *testing.T) {
 		{"¢", toSjis("￠")},
 	}
 	for _, tt := range convertedPairs {
-		input := bytes.NewBuffer(tt.in)
-		output := new(bytes.Buffer)
+		input := bytes.NewReader(tt.in)
+		output := bytes.NewBuffer(nil)
 
-		Decode(input, output)
-		if got, want := output.String(), tt.out; got != want {
-			t.Errorf("Encode got: %v, want: %v", got, want)
+		if err := Decode(output, input); err != nil {
+			t.Errorf("no error: %+v", err)
+		}
+		if output.String() != tt.out {
+			t.Errorf("Encode got: %v, want: %v", output.String(), tt.out)
 		}
 	}
 }
