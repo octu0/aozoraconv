@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 
@@ -72,7 +71,7 @@ func TestSjisConv(t *testing.T) {
 
 	input := "\uFF5E∥￠\u2015"
 	reader := transform.NewReader(strings.NewReader(input), encoder)
-	ret, err := ioutil.ReadAll(reader)
+	ret, err := io.ReadAll(reader)
 	if err != nil {
 		t.Errorf("sjis: error %v", err)
 	}

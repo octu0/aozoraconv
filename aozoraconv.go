@@ -3,7 +3,6 @@ package aozoraconv
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 
 	"golang.org/x/text/encoding/japanese"
@@ -56,7 +55,7 @@ func ConvRev(str string) string {
 func Decode(input io.Reader, output io.Writer) (err error) {
 	decoder := japanese.ShiftJIS.NewDecoder()
 	reader := transform.NewReader(input, decoder)
-	ret, err := ioutil.ReadAll(reader)
+	ret, err := io.ReadAll(reader)
 	if err != nil {
 		return err
 	}
@@ -67,7 +66,7 @@ func Decode(input io.Reader, output io.Writer) (err error) {
 
 // Encode convert from Aozora Bunko format (Shift_JIS) into UTF-8
 func Encode(input io.Reader, output io.Writer) (err error) {
-	ret, err := ioutil.ReadAll(input)
+	ret, err := io.ReadAll(input)
 	if err != nil {
 		return err
 	}

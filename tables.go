@@ -3,7 +3,7 @@
 // Package aozoraconv provides Aozora Bunko format encodings (JIS X 0208/Shift_JIS).
 package aozoraconv // import "github.com/takahashim/aozoraconv"
 
-//JisEntry is jis character with men, ku, ten
+// JisEntry is jis character with men, ku, ten
 type JisEntry struct {
 	men, ku, ten int8
 }
