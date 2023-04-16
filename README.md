@@ -1,10 +1,14 @@
-# aozoraconv
+# `aozoraconv`
 
-[![Travis](https://img.shields.io/travis/takahashim/aozoraconv.svg?style=flat-square)][travis]
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
+[![MIT License](https://img.shields.io/github/license/octu0/aozoraconv)](https://github.com/octu0/aozoraconv/blob/master/LICENSE)
+[![GoDoc](https://godoc.org/github.com/octu0/aozoraconv?status.svg)](https://godoc.org/github.com/octu0/aozoraconv)
+[![Go Report Card](https://goreportcard.com/badge/github.com/octu0/aozoraconv)](https://goreportcard.com/report/github.com/octu0/aozoraconv)
+[![Releases](https://img.shields.io/github/v/release/octu0/aozoraconv)](https://github.com/octu0/aozoraconv/releases)
 
-[travis]: https://travis-ci.org/takahashim/aozoraconv
-[license]: https://github.com/takahashim/aozoraconv/blob/master/LICENSE
+Original code is [github.com/takahashim/aozoraconv](https://github.com/takahashim/aozoraconv)  
+This fork adds go mod support and features to escape ruby, annotations, etc.
+
+---
 
 aonzoraconv is a tool/library to convert Shift_JIS <-> Unicode texts in Aozora Bunko Format.
 
