@@ -27,8 +27,7 @@ func toSjis(s string) []byte {
 	return ret
 }
 
-func TestAozoraConv(t *testing.T) {
-
+func TestConv(t *testing.T) {
 	var convertedStrings = []struct {
 		in  string
 		out string
@@ -47,8 +46,7 @@ func TestAozoraConv(t *testing.T) {
 	}
 }
 
-func TestAozoraConvR(t *testing.T) {
-
+func TestConvR(t *testing.T) {
 	var convertedStrings = []struct {
 		in  string
 		out string
@@ -317,5 +315,16 @@ func TestAllKuten2SjisChars(t *testing.T) {
 	got, want := len(buf), 13758
 	if len(buf) != want {
 		t.Errorf("kuten2sjis got: %v want: %v", got, want)
+	}
+}
+
+func TestReverse(t *testing.T) {
+	v := reverse([]string{"a", "b", "c", "d"})
+	if (v[0] == "d" && v[1] == "c" && v[2] == "b" && v[3] == "a") != true {
+		t.Errorf("actual %v", v)
+	}
+	v = reverse([]string{"a", "b", "c"})
+	if (v[0] == "c" && v[1] == "b" && v[2] == "a") != true {
+		t.Errorf("actual %v", v)
 	}
 }

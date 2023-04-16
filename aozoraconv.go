@@ -36,9 +36,8 @@ const (
 // reverse reverses aozoraUtf8CharReplacer
 func reverse(s []string) []string {
 	r := make([]string, len(s))
-	for i := len(r) - 1; i >= 0; i-- {
-		opp := len(r) - i - 1
-		r[i] = s[opp]
+	for i, v := range s {
+		r[len(r)-i-1] = v
 	}
 	return r
 }
