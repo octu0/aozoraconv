@@ -2,5 +2,6 @@
 #*#
 *.bak
 tmp/
+*.swp
 
 cmd/aozoraconv/aozoraconv
