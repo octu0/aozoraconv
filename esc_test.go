@@ -25,6 +25,16 @@ func TestEscaperRuby(t *testing.T) {
 			tt.Errorf("escape | and << and >>: actual=%s", out)
 		}
 	})
+	t.Run("multiple", func(tt *testing.T) {
+		e := newRubyEscaper()
+		out, ok := e.Escape(`下宿屋は二階中を開《あけ》ひろげて蚊帳《かや》や蒲団《ふとん》を乾して居る`)
+		if ok != true {
+			tt.Errorf("always true")
+		}
+		if out != "下宿屋は二階中を開ひろげて蚊帳や蒲団を乾して居る" {
+			tt.Errorf("multiple actual=%s", out)
+		}
+	})
 	t.Run("no ruby", func(tt *testing.T) {
 		e := newRubyEscaper()
 		out, ok := e.Escape(`停車場`)
@@ -56,6 +66,19 @@ func TestEscaperAnnotation(t *testing.T) {
 		}
 		if out != "（明治四十年十一月）" {
 			tt.Errorf("escape [#] actual=%s", out)
+		}
+	})
+}
+
+func TestEscaperRepeatTwo(t *testing.T) {
+	t.Run("single", func(tt *testing.T) {
+		e := newRepeatTwoEscaper()
+		out, ok := e.Escape(`頭をフラ／＼`)
+		if ok != true {
+			tt.Errorf("always true")
+		}
+		if out != "頭をフラフラ" {
+			tt.Errorf("escape repeat2 actual=%s", out)
 		}
 	})
 }

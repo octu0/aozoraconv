@@ -77,6 +77,7 @@ func main() {
 	options = append(options, aozoraconv.WithoutHeader())
 	options = append(options, aozoraconv.WithoutRuby())
 	options = append(options, aozoraconv.WithoutAnnotation())
+	options = append(options, aozoraconv.WithoutRepeatTwo())
 
 	switch strings.ToLower(encoding) {
 	case "utf8", "utf-8":

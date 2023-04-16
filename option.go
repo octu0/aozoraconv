@@ -6,6 +6,7 @@ type option struct {
 	Header     Escaper
 	Ruby       Escaper
 	Annotation Escaper
+	RepeatTwo  Escaper
 }
 
 func WithoutHeader() OptionFunc {
@@ -26,11 +27,18 @@ func WithoutAnnotation() OptionFunc {
 	}
 }
 
+func WithoutRepeatTwo() OptionFunc {
+	return func(opt *option) {
+		opt.RepeatTwo = newRepeatTwoEscaper()
+	}
+}
+
 func defaultOption() *option {
 	return &option{
 		Header:     nil,
 		Ruby:       nil,
 		Annotation: nil,
+		RepeatTwo:  nil,
 	}
 }
 
