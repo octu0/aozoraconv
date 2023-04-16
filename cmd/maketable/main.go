@@ -5,6 +5,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build ignore
 // +build ignore
 
 package main
@@ -20,11 +21,9 @@ import (
 	"reflect"
 	"sort"
 	"strings"
-
-	"github.com/takahashim/aozoraconv"
 )
 
-//JisEntry is jis character with men, ku, ten
+// JisEntry is jis character with men, ku, ten
 type JisEntry struct {
 	men, ku, ten int
 }
@@ -35,6 +34,19 @@ type JisTbl [2][94][94]string
 var reverse UnicodeTbl
 var mapping JisTbl
 var multichars map[int32]map[int32]JisEntry
+
+// ParseLine parse single line and returns values
+func ParseLine(s string, m, k, t *int, uni, uni2 *int32) error {
+	var err error
+	if _, err = fmt.Sscanf(s, "%d-%02X%02X	U+%X+%X	", m, k, t, uni, uni2); err == nil {
+		return nil
+	} else if _, err = fmt.Sscanf(s, "%d-%02X%02X	U+%X	", m, k, t, uni); err == nil {
+		return nil
+	} else if _, err = fmt.Sscanf(s, "%d-%02X%02X		", m, k, t); err == nil {
+		return nil
+	}
+	return fmt.Errorf("could not parse %q; %v", s, err)
+}
 
 func getTable(url string) {
 	for i := range reverse {
@@ -56,7 +68,7 @@ func getTable(url string) {
 		}
 		m, k, t, uni, uni2 := 0, 0, 0, int32(0), int32(0)
 
-		if err = aozoraconv.ParseLine(s, &m, &k, &t, &uni, &uni2); err != nil {
+		if err = ParseLine(s, &m, &k, &t, &uni, &uni2); err != nil {
 			log.Fatalf("could not parse %q; %v", s, err)
 		}
 		m -= 2
