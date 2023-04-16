@@ -24,14 +24,6 @@ var (
 	aozoraUtf8CharReplacerR = strings.NewReplacer(reverse(aozoraCharMap)...)
 )
 
-const (
-	// EncSjis is magic number of Shift_JIS
-	EncSjis = 1
-
-	// EncUtf8 is magic number of UTF-8
-	EncUtf8 = 2
-)
-
 // reverse reverses aozoraUtf8CharReplacer
 func reverse(s []string) []string {
 	r := make([]string, len(s))
@@ -42,12 +34,18 @@ func reverse(s []string) []string {
 }
 
 // Conv replaces some characters in Unicode
-func Conv(w io.Writer, r io.Reader) error {
+func Conv(w io.Writer, r io.Reader, opts ...OptionFunc) error {
+	option := newOption(opts...)
+	esc := NewEscape(option)
+
 	scan := NewAozoraTextScanner(r)
 	for scan.Scan() {
-		text := scan.Text()
-		replaced := aozoraUtf8CharReplacer.Replace(text)
-		if _, err := w.Write([]byte(replaced)); err != nil {
+		replaced := aozoraUtf8CharReplacer.Replace(scan.Text())
+		newText, ok := esc.Escape(replaced)
+		if ok != true {
+			continue
+		}
+		if _, err := w.Write([]byte(newText)); err != nil {
 			return errors.WithStack(err)
 		}
 	}
@@ -58,11 +56,18 @@ func Conv(w io.Writer, r io.Reader) error {
 }
 
 // ConvRev replaces some characters in Unicode
-func ConvRev(w io.Writer, r io.Reader) error {
-	scan := NewDefaultTextScanner(r)
+func ConvRev(w io.Writer, r io.Reader, opts ...OptionFunc) error {
+	option := newOption(opts...)
+	esc := NewEscape(option)
+
+	scan := NewAozoraTextScanner(r)
 	for scan.Scan() {
 		text := scan.Text()
-		replaced := aozoraUtf8CharReplacerR.Replace(text)
+		newText, ok := esc.Escape(text)
+		if ok != true {
+			continue
+		}
+		replaced := aozoraUtf8CharReplacerR.Replace(newText)
 		if _, err := w.Write([]byte(replaced)); err != nil {
 			return errors.WithStack(err)
 		}
@@ -74,20 +79,20 @@ func ConvRev(w io.Writer, r io.Reader) error {
 }
 
 // Decode convert from UTF-8 into Aozora Bunko format (Shift_JIS)
-func Decode(output io.Writer, input io.Reader) (err error) {
+func Decode(output io.Writer, input io.Reader, opts ...OptionFunc) (err error) {
 	decoder := japanese.ShiftJIS.NewDecoder()
 	reader := transform.NewReader(input, decoder)
-	if err := ConvRev(output, reader); err != nil {
+	if err := ConvRev(output, reader, opts...); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil
 }
 
 // Encode convert from Aozora Bunko format (Shift_JIS) into UTF-8
-func Encode(output io.Writer, input io.Reader) (err error) {
+func Encode(output io.Writer, input io.Reader, opts ...OptionFunc) (err error) {
 	encoder := japanese.ShiftJIS.NewEncoder()
 	writer := transform.NewWriter(output, encoder)
-	if err := Conv(writer, input); err != nil {
+	if err := Conv(writer, input, opts...); err != nil {
 		return errors.WithStack(err)
 	}
 	return nil

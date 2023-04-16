@@ -73,13 +73,18 @@ func main() {
 		encoding = "sjis"
 	}
 
+	options := []aozoraconv.OptionFunc{}
+	options = append(options, aozoraconv.WithoutHeader())
+	options = append(options, aozoraconv.WithoutRuby())
+	options = append(options, aozoraconv.WithoutAnnotation())
+
 	switch strings.ToLower(encoding) {
 	case "utf8", "utf-8":
-		if err := aozoraconv.Encode(output, input); err != nil {
+		if err := aozoraconv.Encode(output, input, options...); err != nil {
 			log.Fatalf("error: %+v", err)
 		}
 	case "sjis", "shift_jis":
-		if err := aozoraconv.Decode(output, input); err != nil {
+		if err := aozoraconv.Decode(output, input, options...); err != nil {
 			log.Fatalf("error: %+v", err)
 		}
 	default:
